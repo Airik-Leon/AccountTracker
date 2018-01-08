@@ -68,6 +68,7 @@ angular.module('appModule')
             vm.updateTransaction = function (transaction) {
                 transaction.type.id = findTransactionId(transaction); 
                 accountService.updateTransaction(transaction).then(function () {
+                	vm.selectedTransaction = null; 
                     reload();
                 });
             }

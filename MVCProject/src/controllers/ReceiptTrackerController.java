@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import data.AccountDAO;
 import data.UserDAO;
 import entities.Account;
+import entities.AccountType;
+import entities.TradeType;
 import entities.Transaction;
 import entities.User;
-
+@CrossOrigin
 @RestController
 public class ReceiptTrackerController {
 	@Autowired
@@ -24,6 +27,7 @@ public class ReceiptTrackerController {
 	@Autowired 
 	AccountDAO accountDAO; 
 	
+	//User Methods
 	@RequestMapping(path="/users", method=RequestMethod.GET)
 	public List<User> usersIndex() {
 		return userDAO.index(); 
@@ -60,92 +64,63 @@ public class ReceiptTrackerController {
 		User u = userDAO.delete(id);
 		return 	u;  
 	}
+	//
+	//Account Methods
+	//
 	@RequestMapping(path="/users/{id}/accounts", method=RequestMethod.GET)
 	public List<Account> indexUserAccounts(@PathVariable int id) {
 		List<Account> userAccounts = accountDAO.indexUserAccounts(id);
 		return userAccounts; 
 	}
+	@RequestMapping(path="/users/{uId}/accounts", method=RequestMethod.POST)
+	public Account createAccounts(@PathVariable int uId, @RequestBody String json, HttpServletResponse res) {
+		System.out.println(json);
+		Account a = accountDAO.create(uId, json);
+		return 	a;  
+	}
+	@RequestMapping(path="/users/{uId}/accounts/{aId}", method=RequestMethod.PUT)
+	public Account updateAccounts( @RequestBody String json, @PathVariable int uId,@PathVariable int aId, HttpServletResponse res) {
+		Account a = accountDAO.update(aId, json); 
+		return a; 
+	}
+	@RequestMapping(path="/users/{uId}/accounts/{aId}", method=RequestMethod.DELETE)
+	public Account deleteAccount(@PathVariable int aId, @PathVariable int uId) {
+		Account a = accountDAO.delete(aId); 
+		return a; 
+	}
+	
+	/*
+	 * Transaction methods 
+	 */
+	
 	@RequestMapping(path="/users/{uId}/accounts/{aId}/transactions", method=RequestMethod.GET)
 	public List<Transaction> indexUserAccountsTransactions(@PathVariable int uId, @PathVariable int aId) {
 		List<Transaction> userAccounts = accountDAO.indexUserAccountsTransactions(uId, aId);
 		return userAccounts; 
 	}
-	@RequestMapping(path="/users/{uId}/accounts/{aId}/transactions/{tId}", method=RequestMethod.GET)
-	public Transaction showUserAccountsTransactions(@PathVariable int uId,
-			@PathVariable int aId, @PathVariable int tId) {
-		Transaction t = accountDAO.showUserAccountsTransactions(uId, aId, tId);
-		return t; 
-	}
-	
-	@RequestMapping(path="/accounts", method=RequestMethod.GET)
-	public List<Account> accountsIndex() {
-		return accountDAO.index();  
-	}
-	@RequestMapping(path="/accounts/{id}", method=RequestMethod.GET)
-	public Account accountsShow(@PathVariable int id) {
-		return accountDAO.show(id);  
-	}
-	@RequestMapping(path="/accounts", method=RequestMethod.POST)
-	public Account createAccounts(@RequestBody String json, HttpServletResponse res) {
-		Account a = accountDAO.create(json);
-		if(a == null) {
-			res.setStatus(400);
-		}
-		else {
-			res.setStatus(202);
-		}
-		
-		return 	a;  
-	}
-	@RequestMapping(path="/accounts/{id}", method=RequestMethod.PUT)
-	public Account updateAccounts( @RequestBody String json, @PathVariable int id, HttpServletResponse res) {
-		Account a = accountDAO.update(id, json); 
-		if(a == null) {
-			res.setStatus(400);
-		}
-		else {
-			res.setStatus(202);
-		}
-		return a; 
-	}
-	@RequestMapping(path="/accounts/{id}", method=RequestMethod.DELETE)
-	public Account deleteAccounts( @PathVariable int id) {
-		Account a = accountDAO.delete(id); 
-		return a; 
-	}
-	@RequestMapping(path="/accounts/{id}/transactions", method=RequestMethod.GET)
-	public List<Transaction> indexAccountTransactions(@PathVariable int id) {
-		return accountDAO.indexTransactions(id);  
-	}
-	@RequestMapping(path="/accounts/{aId}/transactions/{tId}", method=RequestMethod.GET)
-	public Transaction showAccountTransaction(@PathVariable int aId, @PathVariable int tId) {
-		return accountDAO.showTransaction(tId); 
-	}
-	@RequestMapping(path="/accounts/{aId}/transactions/", method=RequestMethod.POST)
-	public Transaction createAccountTransaction(@PathVariable int aId, @RequestBody String json, HttpServletResponse res) {
-		Transaction t = accountDAO.createTransaction(json);
-		if(t == null) {
-			res.setStatus(400);
-		}
-		else {
-			res.setStatus(202);
-		}
+	@RequestMapping(path="/users/{uId}/accounts/{aId}/transactions", method=RequestMethod.POST)
+	public Transaction createAccountTransaction(@PathVariable int uId, @PathVariable int aId, @RequestBody String json, HttpServletResponse res) {
+		Transaction t = accountDAO.createTransaction(uId, aId, json);
 		return t;  
 	}
-	@RequestMapping(path="/accounts/{aId}/transactions/{tId}", method=RequestMethod.PUT)
-	public Transaction updateAccountTransaction(@PathVariable int tId, @RequestBody String json, HttpServletResponse res) {
-		Transaction t = accountDAO.updateTransaction(json, tId);
-		if(t == null) {
-			res.setStatus(400);
-		}
-		else {
-			res.setStatus(202);
-		}
+	@RequestMapping(path="users/{uId}/accounts/{aId}/transactions/{tId}", method=RequestMethod.PUT)
+	public Transaction updateAccountTransaction(@PathVariable int uId, @PathVariable int aId, @PathVariable int tId, @RequestBody String json, HttpServletResponse res) {
+		Transaction t = accountDAO.updateTransaction(uId, aId, tId, json);
 		return t;  
 	}
-	@RequestMapping(path="/accounts/{aId}/transactions/{tId}", method=RequestMethod.DELETE)
+	@RequestMapping(path="users/{uId}/accounts/{aId}/transactions/{tId}", method=RequestMethod.DELETE)
 	public Transaction deleteAccountTransactions(@PathVariable int tId) {
 		Transaction t = accountDAO.deleteTransaction(tId); 
 		return t;  
+	}
+	
+	//Send types of trades
+	@RequestMapping(path="/transactionType", method=RequestMethod.GET)
+	public List<TradeType> TradeTypes(){
+		return accountDAO.indexTradeType(); 
+	}
+	@RequestMapping(path="/accountType", method=RequestMethod.GET)
+	public List<AccountType> accountTypes(){
+		return accountDAO.indexAccountType(); 
 	}
 }

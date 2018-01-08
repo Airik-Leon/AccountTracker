@@ -1,5 +1,6 @@
 package entities;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
@@ -15,7 +16,7 @@ public class Transaction {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id; 
-	private LocalDateTime date; 
+	private Timestamp date; 
 	@Column(name="company_name")
 	private String companyName;
 	@Column(name="company_address")
@@ -32,10 +33,10 @@ public class Transaction {
 	private double price; 
 	
 	
-	public LocalDateTime getDate() {
+	public Timestamp getDate() {
 		return date;
 	}
-	public void setDate(LocalDateTime date) {
+	public void setDate(Timestamp date) {
 		this.date = date;
 	}
 	public String getCompanyName() {
